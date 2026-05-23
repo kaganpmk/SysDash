@@ -1,44 +1,42 @@
-# SysDash — Repo Yönergeleri
+# SysDash
 
-Bu dosya, projeyi GitHub'a yüklerken hangi dosyaların dahil edilmesi/edilmemesi gerektiğini ve basit bir yayın (release) / indirme bağlantısı oluşturma akışını açıklar.
+SysDash sistem ve ağ izleme arayüzüdür — ekran üzerinde CPU, GPU, bellek, ağ hızları ve çalışma süresi bilgilerini gösterir.
 
-**Hangi dosyaları yüklemeliyim?**
+**Öne çıkanlar**
 
-- **Ekle**: çözüm dosyası ve kaynak kod: `SysDash.slnx`, `SysDash.csproj`, `App.xaml`, `MainWindow.xaml`, `Controls/`, `Converters/`, `Services/`, `ViewModels/`, `Models/`, `Resources/`
-- **Ekle**: proje ayarları ve bağımlılık tanımları (ör. paket referansları) — `.csproj` dosyaları.
-
-**Hangi dosyaları yüklememeliyim?**
-
-- **Hariç tut**: derleme çıktıları ve ara dosyalar — `bin/`, `obj/`.
-- **Hariç tut**: IDE ve kullanıcı ayarları — `.vs/`, `.vscode/`, `*.user`, `*.suo`.
-- **Hariç tut**: NuGet paketleri ve paket çıktıları — `packages/`, `*.nupkg`.
-- **Hariç tut**: yerel/secret yapılandırma dosyaları — `appsettings.*.json`, `*.local`.
-
-## Basit indirme / setup seçenekleri
-
-1. Hızlı yol — Self-contained single-file publish (zip olarak paylaşmak)
-
-- Yerel olarak üretmek için (PowerShell, proje kökünde):
-
-```powershell
-dotnet publish SysDash/SysDash.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true -o publish
-Compress-Archive -Path publish\* -DestinationPath SysDash-win-x64.zip
-```
-
-- Ortaya çıkan `SysDash-win-x64.zip` dosyasını GitHub Release'e yükleyin; kullanıcılar zip'i indirip çalıştırabilir.
-
-2. Resmi bir yükleyici oluşturmak
-
-- MSIX veya MSI için: WiX Toolset veya Advanced Installer kullanabilirsiniz.
-- Kolay seçenek: Inno Setup ile bir installer script yazıp `artifact` olarak paylaşmak.
-
-3. Otomatik derleme + release (GitHub Actions)
-
-- Bu repoya bir GitHub Actions iş akışı ekleyerek, belirli bir tag (`v*`) ile pusha çıktığınızda otomatik olarak derleyip release oluşturabilirsiniz. Aşağıda `.github/workflows/publish.yml` örneği bulunur.
+- Gerçek zamanlı CPU / GPU / RAM / Ağ metrikleri
+- Çoklu monitör desteği ve küçük ekran modları
+- Arka plan uygulama ve sistem tepsisi kısayolları
 
 ---
 
-İsterseniz ben `.gitignore`, temel `README.md` ve basit bir GitHub Actions iş akışı dosyası ekleyebilirim ve isterseniz commit/push işlemlerini nasıl yapacağınızı gösteririm.
+## İndirme ve Kurulum
+
+Hazır paketler ve kurulum dosyaları GitHub Releases sayfasında bulunur. Her release içinde iki varlık olacak:
+
+- `SysDash-<tag>.zip` — tek dosya olarak yayınlanan self-contained uygulama (çalıştırılabilir exe içerir)
+- `SysDashSetup-<tag>.exe` — Windows için kurulum programı (Inno Setup ile oluşturulmuş)
+
+Kurulum seçenekleri:
+
+- Hızlı (portable): `SysDash-<tag>.zip` içindeki `SysDash.exe`'yi çıkarıp çalıştırın.
+- Kurulum: `SysDashSetup-<tag>.exe`'yi çift tıklayıp standart Windows kurulum adımlarını takip edin.
+
+Not: Releases sayfası repo ana sayfasında "Releases" veya "Tags" bölümünde görünür; kullanıcılar oradan uygun `v*` tag'ini seçip dosyaları indirebilir.
+
+---
+
+## Güncelleme akışı (kullanıcı olarak)
+
+1. Siz bir yeni sürüm (ör. `v1.2.0`) görmek isterseniz, repository sahibi bu sürümü tag'leyip GitHub'a pushlar.
+2. Tag pushlandığında GitHub Actions otomatik olarak derler ve release'e `SysDash-<tag>.zip` ile `SysDashSetup-<tag>.exe` yükler.
+3. Kullanıcılar Releases'ten dilediklerini indirip kurabilirler. Eski sürümler release listesinde kalır; kullanıcılar seçim yapabilir.
+
+---
+
+## Sorun bildirimi / İletişim
+
+Hataları Issues sekmesinden bildirin veya repo sahibiyle doğrudan iletişime geçin.
 
 ## Nasıl release yaparım (adımlar)
 

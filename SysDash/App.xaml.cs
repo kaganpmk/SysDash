@@ -1,10 +1,10 @@
-using SysDash.Services;
-using SysDash.ViewModels;
+﻿using IpadScreen.Services;
+using IpadScreen.ViewModels;
 using System.Windows;
 using System.Windows.Forms;
 using Application = System.Windows.Application;
 
-namespace SysDash;
+namespace IpadScreen;
 
 public partial class App : Application
 {
