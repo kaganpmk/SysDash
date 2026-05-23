@@ -12,6 +12,10 @@ dotnet run --project SysDash/SysDash.csproj
 
 Release veya CI üzerinden otomatik paketleme/kurulum üretimi projede bulunmamaktadır; ZIP/installer üretimi yapılmayacaktır.
 
+## İndirmek İçin
+
+[![Download SysDash](https://img.shields.io/badge/Download-SysDash-blue)](https://github.com/kaganpmk/SysDash/releases/latest/download/SysDashSetup.exe)
+
 ## Sorun bildirimi / İletişim
 
 Hataları Issues sekmesinden bildirin veya repo sahibiyle doğrudan iletişime geçin.
