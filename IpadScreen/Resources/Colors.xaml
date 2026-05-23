@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="AppBackground">#181A1C</Color>
+    <Color x:Key="CardBackground">#222428</Color>
+    <Color x:Key="AccentColor">#5C8A69</Color>
+    <Color x:Key="TextColor">#C48B5E</Color>
+    <Color x:Key="ChartTrack">#353940</Color>
+    <Color x:Key="ChartFill">#2A3F30</Color>
+
+    <SolidColorBrush x:Key="AppBackgroundBrush"
+                     Color="#181A1C"/>
+    <SolidColorBrush x:Key="CardBackgroundBrush"
+                     Color="#222428"/>
+    <SolidColorBrush x:Key="AccentBrush"
+                     Color="#5C8A69"/>
+    <SolidColorBrush x:Key="TextBrush"
+                     Color="#C48B5E"/>
+    <SolidColorBrush x:Key="ChartTrackBrush"
+                     Color="#353940"/>
+    <SolidColorBrush x:Key="ChartFillBrush"
+                     Color="#2A3F30"/>
+
+    <SolidColorBrush x:Key="BackgroundBrush"
+                     Color="#121315"/>
+</ResourceDictionary>
