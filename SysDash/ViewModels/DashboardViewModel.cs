@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
-using IpadScreen.Services;
+using SysDash.Services;
 
-namespace IpadScreen.ViewModels;
+namespace SysDash.ViewModels;
 
 public partial class DashboardViewModel : ObservableObject
 {

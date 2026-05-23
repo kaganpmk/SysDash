@@ -1,11 +1,11 @@
 using Microsoft.Win32;
 
-namespace IpadScreen.Services;
+namespace SysDash.Services;
 
 public class AutoStartService
 {
     private const string RegistryKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string AppName = "IpadScreen";
+    private const string AppName = "SysDash";
 
     public bool IsEnabled
     {

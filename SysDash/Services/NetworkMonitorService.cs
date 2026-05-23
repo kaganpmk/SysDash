@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 
-namespace IpadScreen.Services;
+namespace SysDash.Services;
 
 public class NetworkMonitorService
 {

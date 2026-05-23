@@ -2,7 +2,7 @@ using System.Windows;
 using Color = System.Windows.Media.Color;
 using Point = System.Windows.Point;
 
-namespace IpadScreen.Controls;
+namespace SysDash.Controls;
 
 public class SparklineChart : FrameworkElement
 {

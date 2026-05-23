@@ -5,7 +5,7 @@ using Point = System.Windows.Point;
 using Pen = System.Windows.Media.Pen;
 using Size = System.Windows.Size;
 
-namespace IpadScreen.Controls;
+namespace SysDash.Controls;
 
 public class GaugeControl : FrameworkElement
 {

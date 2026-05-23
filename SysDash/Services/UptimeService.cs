@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace IpadScreen.Services;
+namespace SysDash.Services;
 
 public class UptimeService
 {
