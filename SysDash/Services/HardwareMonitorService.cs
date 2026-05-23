@@ -1,7 +1,7 @@
 using System.Management;
 using LibreHardwareMonitor.Hardware;
 
-namespace IpadScreen.Services;
+namespace SysDash.Services;
 
 internal class UpdateVisitor : IVisitor
 {

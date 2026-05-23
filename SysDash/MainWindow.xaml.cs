@@ -1,11 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Threading;
-using IpadScreen.Services;
-using IpadScreen.ViewModels;
+using SysDash.Services;
+using SysDash.ViewModels;
 using MessageBox = System.Windows.MessageBox;
 
-namespace IpadScreen;
+namespace SysDash;
 
 public partial class MainWindow : Window
 {
@@ -66,8 +66,8 @@ public partial class MainWindow : Window
     {
         _trayIcon = new NotifyIcon
         {
-            Icon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath ?? "IpadScreen.exe"),
-            Text = "iPad Ekran",
+            Icon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath ?? "SysDash.exe"),
+            Text = "SysDash",
             Visible = true
         };
 

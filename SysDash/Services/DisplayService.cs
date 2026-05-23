@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Forms;
 
-namespace IpadScreen.Services;
+namespace SysDash.Services;
 
 public class DisplayService
 {
@@ -84,7 +84,7 @@ public class DisplayService
         window.ResizeMode = ResizeMode.CanResize;
         window.WindowState = WindowState.Normal;
         window.Topmost = false;
-        window.Title = "iPad Ekran";
+        window.Title = "SysDash";
         window.Left = (SystemParameters.WorkArea.Width - 800) / 2;
         window.Top = (SystemParameters.WorkArea.Height - 600) / 2;
         window.Width = 800;

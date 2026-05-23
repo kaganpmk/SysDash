@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace IpadScreen.Converters;
+namespace SysDash.Converters;
 
 public class PercentToWidthMultiConverter : IMultiValueConverter
 {

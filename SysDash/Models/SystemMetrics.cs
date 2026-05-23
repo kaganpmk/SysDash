@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace IpadScreen.Models;
+namespace SysDash.Models;
 
 public partial class SystemMetrics : ObservableObject
 {

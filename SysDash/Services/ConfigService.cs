@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text.Json;
 
-namespace IpadScreen.Services;
+namespace SysDash.Services;
 
 public class Config
 {
@@ -13,7 +13,7 @@ public class ConfigService
 {
     private static readonly string ConfigPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "IpadScreen", "config.json");
+        "SysDash", "config.json");
 
     public Config Load()
     {
