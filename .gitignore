@@ -8,6 +8,7 @@
 ## Build folders
 bin/
 obj/
+Installer/
 
 ## NuGet
 *.nupkg

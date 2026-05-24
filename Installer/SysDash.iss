@@ -1,6 +1,6 @@
 [Setup]
 AppName=SysDash
-AppVersion=1.0.0
+AppVersion=1.2.0
 DefaultDirName={pf}\SysDash
 DefaultGroupName=SysDash
 OutputBaseFilename=SysDashSetup
