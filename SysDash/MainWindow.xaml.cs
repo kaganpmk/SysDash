@@ -13,6 +13,7 @@ public partial class MainWindow : Window
     private readonly DisplayService _displayService;
     private NotifyIcon? _trayIcon;
     private readonly DispatcherTimer _screenCheckTimer;
+    private bool _isWindowed;
 
     public MainWindow(DashboardViewModel viewModel, DisplayService displayService)
     {
@@ -31,6 +32,7 @@ public partial class MainWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        _isWindowed = WindowStyle == WindowStyle.SingleBorderWindow;
         CreateTrayIcon();
     }
 
@@ -45,21 +47,29 @@ public partial class MainWindow : Window
         var count = _displayService.CheckForScreenChanges();
         if (count > 1)
         {
-            var wasWindowed = Width <= 900;
             var handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             var currentScreen = Screen.FromHandle(handle);
             var smallest = _displayService.GetSmallestScreen();
-            if (smallest != null && (wasWindowed || smallest.DeviceName != currentScreen.DeviceName))
+            if (smallest != null && (_isWindowed || smallest.DeviceName != currentScreen.DeviceName))
             {
                 _displayService.PositionWindowOnScreen(this, smallest);
+                _isWindowed = false;
                 BuildTrayMenu();
             }
         }
-        else if (count == 1 && Width > 900)
+        else if (count == 1 && !_isWindowed)
         {
             _displayService.SetWindowedMode(this);
+            _isWindowed = true;
             BuildTrayMenu();
         }
+    }
+
+    private void OnDpiChanged(object sender, System.Windows.DpiChangedEventArgs e)
+    {
+        var target = _isWindowed ? null : _displayService.GetTargetScreen();
+        if (target != null)
+            _displayService.PositionWindowOnScreen(this, target);
     }
 
     private void CreateTrayIcon()
@@ -102,6 +112,7 @@ public partial class MainWindow : Window
             {
                 _displayService.SetTargetScreen(capturedScreen.DeviceName);
                 _displayService.PositionWindowOnScreen(this, capturedScreen);
+                _isWindowed = false;
                 BuildTrayMenu();
             };
             monitorMenu.DropDownItems.Add(item);
