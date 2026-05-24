@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Forms;
 
@@ -58,11 +59,37 @@ public class DisplayService
         window.ResizeMode = ResizeMode.NoResize;
         window.WindowState = WindowState.Normal;
         window.Topmost = true;
+
         var bounds = screen.Bounds;
-        window.Left = bounds.X;
-        window.Top = bounds.Y;
-        window.Width = bounds.Width;
-        window.Height = bounds.Height;
+        var (scaleX, scaleY) = GetDpiScale(screen);
+        window.Left = bounds.X / scaleX;
+        window.Top = bounds.Y / scaleY;
+        window.Width = bounds.Width / scaleX;
+        window.Height = bounds.Height / scaleY;
+    }
+
+    private const int LOGPIXELSX = 88;
+    private const int LOGPIXELSY = 90;
+
+    [DllImport("gdi32.dll")]
+    private static extern IntPtr CreateDC(string lpszDriver, string? lpszDevice, string? lpszOutput, IntPtr lpInitData);
+
+    [DllImport("gdi32.dll")]
+    private static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+
+    [DllImport("gdi32.dll")]
+    private static extern bool DeleteDC(IntPtr hdc);
+
+    private static (double scaleX, double scaleY) GetDpiScale(System.Windows.Forms.Screen screen)
+    {
+        var dc = CreateDC(screen.DeviceName, null, null, IntPtr.Zero);
+        if (dc == IntPtr.Zero) return (1.0, 1.0);
+
+        var dpiX = GetDeviceCaps(dc, LOGPIXELSX);
+        var dpiY = GetDeviceCaps(dc, LOGPIXELSY);
+        DeleteDC(dc);
+
+        return (dpiX / 96.0, dpiY / 96.0);
     }
 
     private int _lastKnownScreenCount = Screen.AllScreens.Length;

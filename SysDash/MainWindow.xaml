@@ -8,11 +8,14 @@
         WindowState="Normal"
         Topmost="True"
         ResizeMode="NoResize"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display"
         Background="{StaticResource AppBackgroundBrush}"
         FontFamily="Consolas"
         ShowInTaskbar="True"
         Loaded="OnLoaded"
-        Closing="OnClosing">
+        Closing="OnClosing"
+        DpiChanged="OnDpiChanged">
     <Window.Resources>
         <converters:PercentToWidthMultiConverter x:Key="PercentToWidthConverter"/>
     </Window.Resources>
@@ -99,10 +102,25 @@
                                    Margin="0,2,0,0"/>
                     </StackPanel>
 
-                    <controls:SparklineChart Grid.Row="2"
-                                             Data="{Binding CpuSparklineData}"
-                                             Height="50"
-                            Margin="0,6,0,0"/>
+                    <!-- CPU Bar -->
+                    <Border Grid.Row="2"
+                            x:Name="CpuTrack"
+                            Height="10"
+                            Margin="4,6,4,0"
+                            CornerRadius="3"
+                            Background="{StaticResource ChartTrackBrush}">
+                        <Border CornerRadius="3"
+                                Background="{StaticResource AccentBrush}"
+                                HorizontalAlignment="Left">
+                            <Border.Width>
+                                <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                    <Binding Path="CpuPercentage"/>
+                                    <Binding Path="ActualWidth"
+                                            ElementName="CpuTrack"/>
+                                </MultiBinding>
+                            </Border.Width>
+                        </Border>
+                    </Border>
                 </Grid>
             </Border>
 
@@ -269,10 +287,25 @@
                         </Border>
                     </Grid>
 
-                    <controls:SparklineChart Grid.Row="2"
-                                             Data="{Binding NetworkSparklineData}"
-                                             Height="36"
-                            Margin="0,4,0,0"/>
+                    <!-- Network Bar -->
+                    <Border Grid.Row="2"
+                            x:Name="NetworkTrack"
+                            Height="8"
+                            Margin="4,4,4,0"
+                            CornerRadius="3"
+                            Background="{StaticResource ChartTrackBrush}">
+                        <Border CornerRadius="3"
+                                Background="{StaticResource AccentBrush}"
+                                HorizontalAlignment="Left">
+                            <Border.Width>
+                                <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                    <Binding Path="NetworkPercentage"/>
+                                    <Binding Path="ActualWidth"
+                                            ElementName="NetworkTrack"/>
+                                </MultiBinding>
+                            </Border.Width>
+                        </Border>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>

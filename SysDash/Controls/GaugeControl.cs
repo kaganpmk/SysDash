@@ -15,11 +15,11 @@ public class GaugeControl : FrameworkElement
 
     public static readonly DependencyProperty GaugeColorProperty =
         DependencyProperty.Register(nameof(GaugeColor), typeof(Color), typeof(GaugeControl),
-            new FrameworkPropertyMetadata(Color.FromRgb(0x5C, 0x8A, 0x69), FrameworkPropertyMetadataOptions.AffectsRender));
+            new FrameworkPropertyMetadata(Color.FromRgb(0x5C, 0x8A, 0x69), FrameworkPropertyMetadataOptions.AffectsRender, OnGaugeColorChanged));
 
     public static readonly DependencyProperty TrackColorProperty =
         DependencyProperty.Register(nameof(TrackColor), typeof(Color), typeof(GaugeControl),
-            new FrameworkPropertyMetadata(Color.FromRgb(0x35, 0x39, 0x40), FrameworkPropertyMetadataOptions.AffectsRender));
+            new FrameworkPropertyMetadata(Color.FromRgb(0x35, 0x39, 0x40), FrameworkPropertyMetadataOptions.AffectsRender, OnTrackColorChanged));
 
     public static readonly DependencyProperty StrokeThicknessProperty =
         DependencyProperty.Register(nameof(StrokeThickness), typeof(double), typeof(GaugeControl),
@@ -32,6 +32,23 @@ public class GaugeControl : FrameworkElement
     public static readonly DependencyProperty SubLabelProperty =
         DependencyProperty.Register(nameof(SubLabel), typeof(string), typeof(GaugeControl),
             new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsRender));
+
+    private static Pen? _cachedGaugePen;
+    private static Color _cachedGaugeColor;
+    private static double _cachedGaugeThickness;
+    private static Pen? _cachedTrackPen;
+    private static Color _cachedTrackColor;
+    private static double _cachedTrackThickness;
+
+    private static void OnGaugeColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        _cachedGaugePen = null;
+    }
+
+    private static void OnTrackColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        _cachedTrackPen = null;
+    }
 
     public double Percentage
     {
@@ -86,17 +103,30 @@ public class GaugeControl : FrameworkElement
         var startAngle = 135.0;
         var sweepAngle = 270.0;
 
-        var trackPen = new Pen(new SolidColorBrush(TrackColor), StrokeThickness)
-        { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
-        var gaugePen = new Pen(new SolidColorBrush(GaugeColor), StrokeThickness)
-        { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+        if (_cachedTrackPen == null || _cachedTrackColor != TrackColor || _cachedTrackThickness != StrokeThickness)
+        {
+            _cachedTrackPen = new Pen(new SolidColorBrush(TrackColor), StrokeThickness)
+            { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+            _cachedTrackPen.Freeze();
+            _cachedTrackColor = TrackColor;
+            _cachedTrackThickness = StrokeThickness;
+        }
+
+        if (_cachedGaugePen == null || _cachedGaugeColor != GaugeColor || _cachedGaugeThickness != StrokeThickness)
+        {
+            _cachedGaugePen = new Pen(new SolidColorBrush(GaugeColor), StrokeThickness)
+            { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+            _cachedGaugePen.Freeze();
+            _cachedGaugeColor = GaugeColor;
+            _cachedGaugeThickness = StrokeThickness;
+        }
 
         var trackArc = CreateArc(cx, cy, radius, startAngle, sweepAngle);
         var filledAngle = sweepAngle * Math.Clamp(Percentage / 100.0, 0, 1);
         var gaugeArc = CreateArc(cx, cy, radius, startAngle, filledAngle);
 
-        if (trackArc != null) dc.DrawGeometry(null, trackPen, trackArc);
-        if (gaugeArc != null) dc.DrawGeometry(null, gaugePen, gaugeArc);
+        if (trackArc != null) dc.DrawGeometry(null, _cachedTrackPen, trackArc);
+        if (gaugeArc != null) dc.DrawGeometry(null, _cachedGaugePen, gaugeArc);
 
         if (!string.IsNullOrEmpty(Label) || !string.IsNullOrEmpty(SubLabel))
         {
@@ -134,7 +164,7 @@ public class GaugeControl : FrameworkElement
         var x2 = cx + radius * Math.Cos(endRad);
         var y2 = cy + radius * Math.Sin(endRad);
 
-        var arcSize = new System.Windows.Size(radius, radius);
+        var arcSize = new Size(radius, radius);
 
         var geometry = new StreamGeometry();
         using (var ctx = geometry.Open())
