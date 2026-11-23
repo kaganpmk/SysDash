@@ -256,13 +256,10 @@
                                                FontSize="26"
                                                FontWeight="Bold"
                                                Foreground="{StaticResource TextBrush}"/>
-                                    <TextBlock Text="{Binding RamPercentage, StringFormat={}{0:F0}%}"
+                                    <TextBlock Text=""
                                                FontFamily="{StaticResource MonoFont}"
                                                FontSize="11"
-                                               FontWeight="Bold"
-                                               Foreground="{StaticResource AccentBrush}"
-                                               Margin="0,3,0,0"
-                                               Opacity="0.55"/>
+                                               Margin="0,3,0,0"/>
                                 </StackPanel>
                                 <controls:GaugeControl Grid.Column="1"
                                                        Percentage="{Binding RamPercentage}"

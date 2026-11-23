@@ -135,12 +135,28 @@ public class GaugeControl : FrameworkElement
 
             if (!string.IsNullOrEmpty(Label))
             {
-                // Yuzde yazisi yayin ORTASINDA dursun: 15px mono, dikeyde tam ortali.
+                // Yuzde yazisi yayin TAM ortasinda.
+                // DrawText'in y'si metin kutusunun USTUDUR (taban cizgisi degil).
+                // Kutu yuksekligi Height = ascent + descent + line gap; fontlarin alt boslugu
+                // ust bosluktan buyuk oldugu icin duz Height/2 yazi asagi kayar.
+                // Cozum: taban cizgisini (Baseline) daire merkezine oturt, sonra
+                // metnin gorsel yuksekliginin yarisini yukari kaydir.
+                const double fontSize = 15;
+                var brush = new SolidColorBrush(GaugeColor);
+                brush.Freeze();
                 var ft = new FormattedText(Label, Culture, System.Windows.FlowDirection.LeftToRight,
-                    _typeface, 15, new SolidColorBrush(GaugeColor), 96)
-                { TextAlignment = TextAlignment.Center };
+                    _typeface, fontSize, brush, 96)
+                {
+                    TextAlignment = TextAlignment.Center
+                };
                 ft.SetFontWeight(FontWeights.Bold);
-                dc.DrawText(ft, new Point(cx - ft.Width / 2, cy - ft.Height / 2));
+
+                // Rakamlarin gercek yuksekligi: taban cizgisinden cap-height kadar yukari.
+                // FormattedText.Height'in yarisi degil, glif yuksekliginin yarisi esas alinir.
+                var capHeight = fontSize * 0.72;   // mono fontlarda rakam yuksekligi ~%72 em
+                var baselineOffset = cy + capHeight / 2;
+                var y = baselineOffset - ft.Baseline;
+                dc.DrawText(ft, new Point(cx - ft.Width / 2, y));
             }
 
             if (!string.IsNullOrEmpty(SubLabel))
