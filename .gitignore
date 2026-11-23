@@ -8,7 +8,8 @@
 ## Build folders
 bin/
 obj/
-Installer/
+# Installer tanimi (SysDash.iss) kaynak kodudur, sadece cikti ignore edilir
+Installer/Output/
 
 ## NuGet
 *.nupkg
@@ -32,3 +33,7 @@ publish/
 ## Secrets and local config
 appsettings.*.json
 *.local
+
+## Render/test araci cikisi
+tools/**/bin/
+tools/**/obj/

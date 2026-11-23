@@ -1,4 +1,4 @@
-﻿<Window x:Class="SysDash.MainWindow"
+<Window x:Class="SysDash.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:SysDash.Controls"
@@ -9,315 +9,461 @@
         Topmost="True"
         ResizeMode="NoResize"
         UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
         TextOptions.TextFormattingMode="Display"
         Background="{StaticResource AppBackgroundBrush}"
-        FontFamily="Consolas"
+        FontFamily="Segoe UI Variable Text, Segoe UI"
         ShowInTaskbar="True"
         Loaded="OnLoaded"
         Closing="OnClosing"
         DpiChanged="OnDpiChanged">
     <Window.Resources>
         <converters:PercentToWidthMultiConverter x:Key="PercentToWidthConverter"/>
+
+
+        <Style x:Key="CardTitleDot" TargetType="Ellipse">
+            <Setter Property="Width" Value="6"/>
+            <Setter Property="Height" Value="6"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Fill" Value="{StaticResource AccentBrush}"/>
+        </Style>
     </Window.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
 
-        <!-- Top Panel: Time left - Date right -->
-        <Border Grid.Row="0"
-                Background="{StaticResource CardBackgroundBrush}"
-                Padding="30,12">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+    <Border Padding="10" Background="Transparent">
+        <!-- Instrument panel: board.css .board-panel esdegeri -->
+        <Border CornerRadius="22"
+                Background="{StaticResource PanelBackgroundBrush}"
+                BorderBrush="{StaticResource HairlineBrush}"
+                BorderThickness="1">
+            <Grid ClipToBounds="True">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <TextBlock Text="{Binding CurrentTime}"
-                           FontSize="72"
-                        FontWeight="Bold"
-                           Foreground="{StaticResource TextBrush}"
-                           VerticalAlignment="Center"/>
+                <!-- ============ HEADER ============ -->
+                <Border Grid.Row="0"
+                        Background="{StaticResource PanelHeaderBrush}"
+                        BorderBrush="{StaticResource HairlineBrush}"
+                        BorderThickness="0,0,0,1"
+                        CornerRadius="22,22,0,0"
+                        Padding="20,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="1"
-                        VerticalAlignment="Center"
-                            HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding CurrentDate}"
-                               FontSize="26"
-                               Foreground="{StaticResource TextBrush}"/>
-                    <TextBlock Text="{Binding CurrentDay}"
-                               FontSize="20"
-                               Foreground="{StaticResource AccentBrush}"
-                               Opacity="0.85"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="SYS DASH"
+                                       Style="{StaticResource MicroLabel}"
+                                       FontSize="11.5"
+                                       Foreground="{StaticResource TextBrush}"
+                                       Margin="9,0,0,0"
+                                       VerticalAlignment="Center"/>
+                            <Border Background="{StaticResource AccentSoftBrush}"
+                                    BorderBrush="{StaticResource AccentBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="7"
+                                    Padding="6,1,6,1"
+                                    Margin="9,0,0,0"
+                                    VerticalAlignment="Center">
+                               <TextBlock Text="CANLI"
+                                           FontFamily="{StaticResource MonoFont}"
+                                           FontSize="9.5"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource AccentBrush}"/>
+                            </Border>
+                        </StackPanel>
 
-        <!-- 2x2 Grid -->
-        <Grid Grid.Row="1"
-                Margin="12">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-
-            <!-- CPU Card -->
-            <Border Grid.Row="0"
-                    Grid.Column="0"
-                    Margin="8"
-                    CornerRadius="12"
-                    Background="{StaticResource CardBackgroundBrush}"
-                    Padding="18,14">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Text="CPU"
-                            FontSize="18"
-                            FontWeight="SemiBold"
-                               Foreground="{StaticResource AccentBrush}"/>
-
-                    <StackPanel Grid.Row="1"
-                            VerticalAlignment="Center"
-                                HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding CpuUsageText}"
-                                   FontSize="52"
-                                FontWeight="Bold"
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding CurrentTime}"
+                                   FontFamily="{StaticResource MonoFont}"
+                                   FontSize="26"
+                                   FontWeight="Bold"
                                    Foreground="{StaticResource TextBrush}"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="{Binding CpuTemperatureText}"
-                                   FontSize="24"
-                                   Foreground="{StaticResource AccentBrush}"
                                    HorizontalAlignment="Center"
-                                   Margin="0,2,0,0"/>
-                    </StackPanel>
+                                   VerticalAlignment="Center"/>
 
-                    <!-- CPU Bar -->
-                    <Border Grid.Row="2"
-                            x:Name="CpuTrack"
-                            Height="10"
-                            Margin="4,6,4,0"
-                            CornerRadius="3"
-                            Background="{StaticResource ChartTrackBrush}">
-                        <Border CornerRadius="3"
-                                Background="{StaticResource AccentBrush}"
-                                HorizontalAlignment="Left">
-                            <Border.Width>
-                                <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
-                                    <Binding Path="CpuPercentage"/>
-                                    <Binding Path="ActualWidth"
-                                            ElementName="CpuTrack"/>
-                                </MultiBinding>
-                            </Border.Width>
-                        </Border>
-                    </Border>
-                </Grid>
-            </Border>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <TextBlock Text="{Binding CurrentDate}"
+                                       FontFamily="{StaticResource MonoFont}"
+                                       FontSize="11"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       HorizontalAlignment="Right"/>
+                            <TextBlock Text="{Binding CurrentDay}"
+                                       FontFamily="{StaticResource MonoFont}"
+                                       FontSize="12.5"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,1,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
-            <!-- GPU Card -->
-            <Border Grid.Row="0"
-                    Grid.Column="1"
-                    Margin="8"
-                    CornerRadius="12"
-                    Background="{StaticResource CardBackgroundBrush}"
-                    Padding="18,14">
-                <Grid>
+                <!-- ============ 2x2 GRID ============ -->
+                <Grid Grid.Row="1" Margin="12">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="GPU"
-                            FontSize="18"
-                            FontWeight="SemiBold"
-                               Foreground="{StaticResource AccentBrush}"/>
+                    <!-- CPU -->
+                    <Border Grid.Row="0" Grid.Column="0" Margin="6" Style="{StaticResource CardBorder}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <!-- GPU kartindaki VRAM satirinin karsiligi: iki bar ayni hizada kalsin -->
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="1"
-                            VerticalAlignment="Center"
-                                HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding GpuUsageText}"
-                                   FontSize="52"
-                                FontWeight="Bold"
-                                   Foreground="{StaticResource TextBrush}"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="{Binding GpuTemperatureText}"
-                                   FontSize="24"
-                                   Foreground="{StaticResource AccentBrush}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,2,0,0"/>
-                    </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Style="{StaticResource CardTitleDot}"/>
+                                <TextBlock Text="CPU" Style="{StaticResource MicroLabel}" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
 
-                    <!-- VRAM Bar -->
-                    <Border Grid.Row="2"
-                            x:Name="VramTrack"
-                            Height="10"
-                            Margin="4,6,4,0"
-                            CornerRadius="3"
-                            Background="{StaticResource ChartTrackBrush}">
-                        <Border CornerRadius="3"
-                                Background="{StaticResource AccentBrush}"
-                                HorizontalAlignment="Left">
-                            <Border.Width>
-                                <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
-                                    <Binding Path="VramPercentage"/>
-                                    <Binding Path="ActualWidth"
-                                            ElementName="VramTrack"/>
-                                </MultiBinding>
-                            </Border.Width>
-                        </Border>
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding CpuUsageText}"
+                                           FontFamily="{StaticResource MonoFont}"
+                                           FontSize="42"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding CpuTemperatureText}"
+                                           FontFamily="{StaticResource MonoFont}"
+                                           FontSize="13"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+
+                            <Border Grid.Row="2" x:Name="CpuTrack" Style="{StaticResource BarTrack}">
+                                <Border CornerRadius="2"
+                                        Background="{StaticResource AccentBrush}"
+                                        HorizontalAlignment="Left">
+                                    <Border.Width>
+                                        <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                            <Binding Path="CpuPercentage"/>
+                                            <Binding Path="ActualWidth" ElementName="CpuTrack"/>
+                                        </MultiBinding>
+                                    </Border.Width>
+                                </Border>
+                            </Border>
+
+                            <TextBlock Grid.Row="3"
+                                       FontFamily="{StaticResource MonoFont}"
+                                       FontSize="10.5"
+                                       Text=" "
+                                       Margin="0,6,0,0"/>
+                        </Grid>
                     </Border>
 
-                    <TextBlock Grid.Row="3"
-                            Text="{Binding VramUsageText}"
-                               FontSize="13"
-                               Foreground="{StaticResource TextBrush}"
-                               HorizontalAlignment="Center"
-                               Margin="0,3,0,0"/>
+                    <!-- GPU -->
+                    <Border Grid.Row="0" Grid.Column="1" Margin="6" Style="{StaticResource CardBorder}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Style="{StaticResource CardTitleDot}"/>
+                                <TextBlock Text="GPU" Style="{StaticResource MicroLabel}" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding GpuUsageText}"
+                                           FontFamily="{StaticResource MonoFont}"
+                                           FontSize="42"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding GpuTemperatureText}"
+                                           FontFamily="{StaticResource MonoFont}"
+                                           FontSize="13"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+
+                            <Border Grid.Row="2" x:Name="VramTrack" Style="{StaticResource BarTrack}">
+                                <Border CornerRadius="2"
+                                        Background="{StaticResource AccentBrush}"
+                                        HorizontalAlignment="Left">
+                                    <Border.Width>
+                                        <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                            <Binding Path="VramPercentage"/>
+                                            <Binding Path="ActualWidth" ElementName="VramTrack"/>
+                                        </MultiBinding>
+                                    </Border.Width>
+                                </Border>
+                            </Border>
+
+                            <Grid Grid.Row="3" Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding VramUsageText}"
+                                           FontFamily="{StaticResource MonoFont}"
+                                           FontSize="10.5"
+                                           Foreground="{StaticResource MutedBrush}"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding VramPercentage, StringFormat={}{0:F0}%}"
+                                           FontFamily="{StaticResource MonoFont}"
+                                           FontSize="10.5"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- RAM -->
+                    <Border Grid.Row="1" Grid.Column="0" Margin="6" Style="{StaticResource CardBorder}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Style="{StaticResource CardTitleDot}"/>
+                                <TextBlock Text="RAM" Style="{StaticResource MicroLabel}" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding RamUsageText}"
+                                               FontFamily="{StaticResource MonoFont}"
+                                               FontSize="26"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource TextBrush}"/>
+                                    <TextBlock Text="{Binding RamPercentage, StringFormat={}{0:F0}%}"
+                                               FontFamily="{StaticResource MonoFont}"
+                                               FontSize="11"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource AccentBrush}"
+                                               Margin="0,3,0,0"
+                                               Opacity="0.55"/>
+                                </StackPanel>
+                                <controls:GaugeControl Grid.Column="1"
+                                                       Percentage="{Binding RamPercentage}"
+                                                       GaugeColor="#A9F1FE"
+                                                       TrackColor="#1E232B"
+                                                       StrokeThickness="4"
+                                                       Width="92"
+                                                       Height="92"
+                                                       Label="{Binding RamPercentage, StringFormat={}{0:F0}%}"
+                                                       VerticalAlignment="Center"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- NETWORK -->
+                    <Border Grid.Row="1" Grid.Column="1" Margin="6" Style="{StaticResource CardBorder}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Style="{StaticResource CardTitleDot}"/>
+                                    <TextBlock Text="AĞ / WIFI" Style="{StaticResource MicroLabel}" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <Border Grid.Column="1"
+                                        Background="{StaticResource AccentSoftBrush}"
+                                        BorderBrush="{StaticResource AccentBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="7"
+                                        Padding="8,1,8,1"
+                                        ToolTip="{Binding PingTargetsLabel, StringFormat=Ping hedefleri: {0}}">
+                                    <TextBlock FontFamily="{StaticResource MonoFont}"
+                                               FontSize="10.5"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource AccentBrush}">
+                                        <Run Text="PING "/>
+                                        <Run Text="{Binding PingText, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Border>
+                            </Grid>
+
+                            <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource MutedLabel}">
+                                        <Run Text="▼" Foreground="{StaticResource AccentBrush}"/>
+                                        <Run Text=" IN"/>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding DownloadSpeedText}"
+                                               FontFamily="{StaticResource MonoFont}"
+                                               FontSize="21"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource TextBrush}"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource MutedLabel}">
+                                        <Run Text="▲" Foreground="{StaticResource AccentBrush}"/>
+                                        <Run Text=" OUT"/>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding UploadSpeedText}"
+                                               FontFamily="{StaticResource MonoFont}"
+                                               FontSize="21"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource TextBrush}"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Border Grid.Row="2" x:Name="NetworkTrack" Style="{StaticResource BarTrack}">
+                                <Border CornerRadius="2"
+                                        Background="{StaticResource AccentBrush}"
+                                        HorizontalAlignment="Left">
+                                    <Border.Width>
+                                        <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                            <Binding Path="NetworkPercentage"/>
+                                            <Binding Path="ActualWidth" ElementName="NetworkTrack"/>
+                                        </MultiBinding>
+                                    </Border.Width>
+                                </Border>
+                            </Border>
+                        </Grid>
+                    </Border>
                 </Grid>
-            </Border>
 
-            <!-- RAM Card -->
-            <Border Grid.Row="1"
-                    Grid.Column="0"
-                    Margin="8"
-                    CornerRadius="12"
-                    Background="{StaticResource CardBackgroundBrush}"
-                    Padding="18,14">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Text="RAM"
-                            FontSize="18"
-                            FontWeight="SemiBold"
-                               Foreground="{StaticResource AccentBrush}"/>
-
-                    <StackPanel Grid.Row="1"
-                            VerticalAlignment="Center"
-                                HorizontalAlignment="Center"
-                            Margin="0,4,0,0">
-                        <TextBlock Text="{Binding RamUsageText}"
-                                   FontSize="22"
-                                FontWeight="Bold"
-                                   Foreground="{StaticResource TextBrush}"
-                                   HorizontalAlignment="Center"/>
-                        <controls:GaugeControl
-                            Percentage="{Binding RamPercentage}"
-                            Width="100"
-                                Height="100"
-                            Margin="0,6,0,0"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- Network Card -->
-            <Border Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="8"
-                    CornerRadius="12"
-                    Background="{StaticResource CardBackgroundBrush}"
-                    Padding="18,14">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Text="AĞ / WIFI"
-                            FontSize="18"
-                            FontWeight="SemiBold"
-                               Foreground="{StaticResource AccentBrush}"/>
-
-                    <Grid Grid.Row="1"
-                            VerticalAlignment="Center"
-                            Margin="0,8">
+                <!-- ============ FOOTER: disk seridi (sol) + uptime (sag), tek satir ============ -->
+                <Border Grid.Row="2"
+                        Background="{StaticResource PanelHeaderBrush}"
+                        BorderBrush="{StaticResource HairlineBrush}"
+                        BorderThickness="0,1,0,0"
+                        CornerRadius="0,0,22,22"
+                        Padding="16,9">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock FontSize="26"
-                                    FontWeight="Bold"
-                                       Foreground="{StaticResource TextBrush}">
-                                <Run Text="▼ "
-                                        Foreground="#5C8A69"
-                                        FontSize="20"/>
-                                <Run Text="{Binding DownloadSpeedText}"/>
-                            </TextBlock>
-                            <TextBlock FontSize="26"
-                                    FontWeight="Bold"
-                                       Foreground="{StaticResource TextBrush}"
-                                       Margin="0,4,0,0">
-                                <Run Text="▲ "
-                                        Foreground="#C48B5E"
-                                        FontSize="20"/>
-                                <Run Text="{Binding UploadSpeedText}"/>
-                            </TextBlock>
-                        </StackPanel>
+                        <!-- Disk seridi -->
+                        <ItemsControl Grid.Column="0" ItemsSource="{Binding Disks}"
+                                      HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,14,0" VerticalAlignment="Center">
+                                        <Ellipse Width="5" Height="5" VerticalAlignment="Center">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="{StaticResource AccentBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCritical}" Value="True">
+                                                            <Setter Property="Fill" Value="#C48B5E"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontFamily="{StaticResource MonoFont}"
+                                                   FontSize="10.5"
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   Margin="6,0,0,0"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding UsageText}"
+                                                   FontFamily="{StaticResource MonoFont}"
+                                                   FontSize="10.5"
+                                                   Margin="6,0,0,0"
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsUnknown}" Value="True">
+                                                            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <Border Width="34" Height="3" CornerRadius="2"
+                                                Background="{StaticResource ChartTrackBrush}"
+                                                Margin="6,0,0,0" VerticalAlignment="Center">
+                                            <Border HorizontalAlignment="Left">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                                        <Setter Property="CornerRadius" Value="2"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsCritical}" Value="True">
+                                                                <Setter Property="Background" Value="#C48B5E"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <Border.Width>
+                                                    <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                                        <Binding Path="Percent"/>
+                                                        <Binding Path="ActualWidth"
+                                                                 RelativeSource="{RelativeSource AncestorType=Border}"/>
+                                                    </MultiBinding>
+                                                </Border.Width>
+                                            </Border>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
-                        <Border Grid.Column="1"
-                                Width="70"
-                                Height="50"
-                                CornerRadius="8"
-                                Background="{StaticResource ChartTrackBrush}"
-                                VerticalAlignment="Center"
-                                Margin="8,0,0,0">
-                            <TextBlock Text="{Binding PingText}"
-                                       FontSize="18"
-                                    FontWeight="Bold"
-                                       Foreground="{StaticResource AccentBrush}"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                        </Border>
+                            <!-- Uptime: disklerle ayni satirda, saga yasli -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                        VerticalAlignment="Center" Margin="12,0,0,0">
+                            <Ellipse Width="5" Height="5" Fill="{StaticResource AccentBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding UptimeText}"
+                                       FontFamily="{StaticResource MonoFont}"
+                                       FontSize="10"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       Margin="7,0,0,0"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
                     </Grid>
-
-                    <!-- Network Bar -->
-                    <Border Grid.Row="2"
-                            x:Name="NetworkTrack"
-                            Height="8"
-                            Margin="4,4,4,0"
-                            CornerRadius="3"
-                            Background="{StaticResource ChartTrackBrush}">
-                        <Border CornerRadius="3"
-                                Background="{StaticResource AccentBrush}"
-                                HorizontalAlignment="Left">
-                            <Border.Width>
-                                <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
-                                    <Binding Path="NetworkPercentage"/>
-                                    <Binding Path="ActualWidth"
-                                            ElementName="NetworkTrack"/>
-                                </MultiBinding>
-                            </Border.Width>
-                        </Border>
-                    </Border>
-                </Grid>
-            </Border>
-        </Grid>
-
-        <!-- Bottom Bar: Uptime -->
-        <Border Grid.Row="2"
-                Background="{StaticResource CardBackgroundBrush}"
-                Padding="20,7">
-            <TextBlock Text="{Binding UptimeText}"
-                       FontSize="15"
-                       Foreground="{StaticResource AccentBrush}"
-                       HorizontalAlignment="Center"/>
+                </Border>
+            </Grid>
         </Border>
-    </Grid>
+    </Border>
 </Window>

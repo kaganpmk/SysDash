@@ -12,8 +12,18 @@ public partial class DashboardViewModel : ObservableObject
     private readonly UptimeService _uptimeService;
     private readonly AutoStartService _autoStartService;
     private readonly DisplayService _displayService;
+    private readonly DiskMonitorService _diskMonitor = new();
     private readonly DispatcherTimer _clockTimer;
     private readonly DispatcherTimer _metricsTimer;
+
+    // Ping ayri sayacta: metrik turuna baglamak %3'luk gecikme yaratiyordu.
+    private readonly DispatcherTimer _pingTimer;
+    private bool _pingBusy;
+
+    // Pencere gizliyken olcum durur; gorunur olunca tek tur atilip devam eder.
+    private bool _samplingPaused;
+
+    private static readonly CultureInfo Tr = new("tr-TR");
 
     public DashboardViewModel(HardwareMonitorService hardwareMonitor, NetworkMonitorService networkMonitor,
         UptimeService uptimeService, AutoStartService autoStartService,
@@ -39,8 +49,16 @@ public partial class DashboardViewModel : ObservableObject
         _metricsTimer.Tick += OnMetricsTick;
         _metricsTimer.Start();
 
+        _pingTimer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = TimeSpan.FromSeconds(10)
+        };
+        _pingTimer.Tick += OnPingTick;
+        _pingTimer.Start();
+
         UpdateDateTime();
         UpdateMetrics();
+        _ = UpdatePingAsync();
     }
 
     [ObservableProperty]
@@ -73,6 +91,10 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private double _vramPercentage;
 
+    /// <summary>VRAM kullanim verisi guvenilir mi? LHM kullanim sensoru vermiyorsa false olur.</summary>
+    [ObservableProperty]
+    private bool _vramAvailable;
+
     [ObservableProperty]
     private string _ramUsageText = "--";
 
@@ -94,52 +116,83 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private string _uptimeText = "--";
 
+    /// <summary>Ping tooltip'i: hangi hedefe olcuyor (kullsanicinin sikayeti: "bu pingi neye gore aliyor").</summary>
+    public string PingTargetsLabel => _networkMonitor.TargetsLabel;
+
+    /// <summary>Disk seridi: "C: · Windows  247/512 GB" + yuzde. XAML'de ItemsControl baglar.</summary>
+    public System.Collections.ObjectModel.ObservableCollection<DiskRow> Disks { get; } = new();
+
     public bool IsAutoStart
     {
         get => _autoStartService.IsEnabled;
         set => _autoStartService.IsEnabled = value;
     }
 
-    private int _metricsTick;
+    /// <summary>Pencere gorunurlugune gore olcumu durdurur/devam ettirir.</summary>
+    public void SetSamplingPaused(bool paused)
+    {
+        if (_samplingPaused == paused) return;
+        _samplingPaused = paused;
+
+        if (paused)
+        {
+            _metricsTimer.Stop();
+            _pingTimer.Stop();
+            Log.Info("Olcum duraklatildi (pencere gizli/arkada).");
+        }
+        else
+        {
+            _metricsTimer.Start();
+            _pingTimer.Start();
+            UpdateMetrics();
+            Log.Info("Olcum devam ediyor (pencere gorunur).");
+        }
+    }
 
     private void OnMetricsTick(object? sender, EventArgs e)
     {
-        _metricsTick++;
         UpdateMetrics();
+    }
 
-        if (_metricsTick % 3 == 0)
-        {
-            _ = UpdatePingAsync();
-        }
+    private void OnPingTick(object? sender, EventArgs e)
+    {
+        _ = UpdatePingAsync();
     }
 
     private void UpdateDateTime()
     {
         var now = DateTime.Now;
-        CurrentTime = now.ToString("HH:mm:ss");
-        CurrentDate = now.ToString("dd MMMM yyyy", new CultureInfo("tr-TR"));
-        CurrentDay = now.ToString("dddd", new CultureInfo("tr-TR"));
+        CurrentTime = now.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
+        CurrentDate = now.ToString("dd MMMM yyyy", Tr);
+        CurrentDay = now.ToString("dddd", Tr);
     }
 
     private void UpdateMetrics()
     {
         try
         {
-            if (_metricsTick % 2 == 0)
-                _hardwareMonitor.Update();
+            // Her turda tazele: sensorden okunan deger ancak Update() sonrasi guncel olur.
+            _hardwareMonitor.Update();
 
             var cpu = _hardwareMonitor.GetCpuMetrics();
             CpuUsageText = $"%{cpu.load:F0}";
-            CpuTemperatureText = cpu.temp > 0 ? $"{cpu.temp:F0}°C" : "--";
+            CpuTemperatureText = cpu.temp > 0
+                ? cpu.temp.ToString("F0", CultureInfo.CurrentCulture) + "°C"
+                : "--";
             CpuPercentage = Math.Round(cpu.load, 1);
 
             var gpu = _hardwareMonitor.GetGpuMetrics();
             GpuUsageText = $"%{gpu.load:F0}";
-            GpuTemperatureText = gpu.temp > 0 ? $"{gpu.temp:F0}°C" : "--";
-            VramUsageText = gpu.vramTotal > 0
+            GpuTemperatureText = gpu.temp > 0
+                ? gpu.temp.ToString("F0", CultureInfo.CurrentCulture) + "°C"
+                : "--";
+
+            // Kullanim degeri yoksa yanlis "%0" gostermek yerine gizle.
+            VramAvailable = gpu.vramUsed > 0 && gpu.vramTotal > 0;
+            VramUsageText = VramAvailable
                 ? $"{gpu.vramUsed:F1} / {gpu.vramTotal:F0} GB"
                 : "--";
-            VramPercentage = gpu.vramTotal > 0
+            VramPercentage = VramAvailable
                 ? Math.Round(gpu.vramUsed / gpu.vramTotal * 100, 1)
                 : 0;
 
@@ -159,18 +212,50 @@ public partial class DashboardViewModel : ObservableObject
 
             var uptime = _uptimeService.GetUptime();
             UptimeText = $"Sistem Açık: {_uptimeService.FormatUptime(uptime)}";
+
+            UpdateDisks();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Log.Error("Olcum turu basarisiz.", ex);
+        }
+    }
+
+    private void UpdateDisks()
+    {
+        _diskMonitor.Refresh();
+        var source = _diskMonitor.Disks;
+
+        // Koleksiyonu her turda yeniden kurma: ayni sayida disk varsa degerleri guncelle.
+        if (Disks.Count != source.Count)
+        {
+            Disks.Clear();
+            foreach (var d in source) Disks.Add(DiskRow.From(d));
+            return;
+        }
+
+        for (var i = 0; i < source.Count; i++)
+            Disks[i].Update(source[i]);
     }
 
     private async Task UpdatePingAsync()
     {
+        if (_pingBusy) return;
+        _pingBusy = true;
         try
         {
             var ping = await _networkMonitor.GetPingMsAsync();
             PingText = ping >= 0 ? $"{ping}ms" : "--";
         }
-        catch { }
+        catch (Exception ex)
+        {
+            PingText = "--";
+            Log.Warn("Ping olcumu basarisiz.", ex);
+        }
+        finally
+        {
+            _pingBusy = false;
+        }
     }
 
     public string? GetCurrentMonitorDeviceName()

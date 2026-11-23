@@ -25,7 +25,7 @@ public class UptimeService
             parts.Add($"{uptime.Minutes} dakika");
 
         if (parts.Count == 0)
-            return "1 dakika";
+            return uptime.TotalSeconds < 60 ? "az önce" : "1 dakika";
 
         return string.Join(", ", parts);
     }

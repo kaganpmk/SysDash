@@ -135,9 +135,12 @@ public class GaugeControl : FrameworkElement
 
             if (!string.IsNullOrEmpty(Label))
             {
-                var ft = new FormattedText(Label, Culture, System.Windows.FlowDirection.LeftToRight, _typeface, 16, textColor, 96)
+                // Yuzde yazisi yayin ORTASINDA dursun: 15px mono, dikeyde tam ortali.
+                var ft = new FormattedText(Label, Culture, System.Windows.FlowDirection.LeftToRight,
+                    _typeface, 15, new SolidColorBrush(GaugeColor), 96)
                 { TextAlignment = TextAlignment.Center };
-                dc.DrawText(ft, new Point(cx - ft.Width / 2, cy - ft.Height - 2));
+                ft.SetFontWeight(FontWeights.Bold);
+                dc.DrawText(ft, new Point(cx - ft.Width / 2, cy - ft.Height / 2));
             }
 
             if (!string.IsNullOrEmpty(SubLabel))

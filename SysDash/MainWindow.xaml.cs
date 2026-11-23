@@ -14,6 +14,8 @@ public partial class MainWindow : Window
     private NotifyIcon? _trayIcon;
     private readonly DispatcherTimer _screenCheckTimer;
     private bool _isWindowed;
+    private bool _userOverride;
+    private string _lastScreenSignature = "";
 
     public MainWindow(DashboardViewModel viewModel, DisplayService displayService)
     {
@@ -34,35 +36,80 @@ public partial class MainWindow : Window
     {
         _isWindowed = WindowStyle == WindowStyle.SingleBorderWindow;
         CreateTrayIcon();
+
+        // Ilk turda imzayi yalnizca kaydet; aksi halde acilista konum/kip kendini duzeltir.
+        _lastScreenSignature = _displayService.CheckForScreenChanges();
+
+        // Pencere gizli/kucultulmusken olcum durur; gereksiz CPU ve RAM harcanmaz.
+        StateChanged += (_, _) => UpdateSamplingState();
+        IsVisibleChanged += (_, _) => UpdateSamplingState();
+        UpdateSamplingState();
+
+        // Kucuk pencerede boyut/konum degisikligini hatirla (surukleme bitince).
+        SizeChanged += (_, _) => RememberOverlayBounds();
+        LocationChanged += (_, _) => RememberOverlayBounds();
+    }
+
+    private void UpdateSamplingState()
+    {
+        var visible = IsVisible && WindowState != WindowState.Minimized;
+        _viewModel.SetSamplingPaused(!visible);
+
+        // Gorunmeyen pencerede proc calisma kumesini OS'e iade et (WPF/DirectX yuzeyleri).
+        if (!visible)
+            Services.MemoryTrimmer.Trim();
+    }
+
+    private void RememberOverlayBounds()
+    {
+        if (!string.Equals(_displayService.CurrentMode, "overlay", StringComparison.OrdinalIgnoreCase))
+            return;
+        if (WindowState != WindowState.Normal) return;
+        _displayService.RememberOverlayBounds(Left, Top, Width, Height);
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        Log.Info("Pencere kapaniyor.");
         _trayIcon?.Dispose();
         _screenCheckTimer.Stop();
     }
 
+    /// <summary>
+    /// Ekran sayisi degil, EKRAN KIMLIGI degisirse tepki ver. Onceden yalniz sayi bakildigi icin
+    /// "3 sn sonra kendini eski haline getiriyor" hatasi olusuyordu: tepside secilen ekran/kucuk
+    /// pencere 3 sn'de bir bu tikle geri aliniyordu.
+    /// </summary>
     private void OnScreenCheckTick(object? sender, EventArgs e)
     {
-        var count = _displayService.CheckForScreenChanges();
-        if (count > 1)
+        var current = _displayService.CheckForScreenChanges();
+        if (current == _lastScreenSignature) return;
+        _lastScreenSignature = current;
+
+        // Kullanici tepside ekran/gorunum sectiyse otomatik yerlestirme yapma.
+        if (_userOverride) return;
+
+        var screens = Screen.AllScreens;
+        if (screens.Length > 1)
         {
             var handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             var currentScreen = Screen.FromHandle(handle);
-            var smallest = _displayService.GetSmallestScreen();
-            if (smallest != null && (_isWindowed || smallest.DeviceName != currentScreen.DeviceName))
+            var target = _displayService.GetSmallestScreen();
+            if (target != null && !string.Equals(target.DeviceName, currentScreen.DeviceName,
+                    StringComparison.OrdinalIgnoreCase))
             {
-                _displayService.PositionWindowOnScreen(this, smallest);
+                _displayService.PositionWindowOnScreen(this, target);
                 _isWindowed = false;
                 BuildTrayMenu();
             }
         }
-        else if (count == 1 && !_isWindowed)
+        else if (!_isWindowed)
         {
             _displayService.SetWindowedMode(this);
             _isWindowed = true;
             BuildTrayMenu();
         }
+        Log.Info($"Ekran duzeni degisti -> yeniden yerlestirildi (ekran sayisi {screens.Length}).");
     }
 
     private void OnDpiChanged(object sender, System.Windows.DpiChangedEventArgs e)
@@ -110,15 +157,40 @@ public partial class MainWindow : Window
             var capturedScreen = screen;
             item.Click += (_, _) =>
             {
+                _userOverride = true;          // otomatik yerlestirme bir daha ezmesin
                 _displayService.SetTargetScreen(capturedScreen.DeviceName);
                 _displayService.PositionWindowOnScreen(this, capturedScreen);
                 _isWindowed = false;
                 BuildTrayMenu();
+                Log.Info($"Ekran secildi: {capturedScreen.DeviceName}");
             };
             monitorMenu.DropDownItems.Add(item);
         }
 
         menu.Items.Add(monitorMenu);
+        menu.Items.Add(new ToolStripSeparator());
+
+        // Panel / overlay secimi: overlay kucuk pencere, ilk acilista boyutu ayarlanir.
+        var modeMenu = new ToolStripMenuItem("Görünüm");
+        foreach (var (key, label) in new[] { ("panel", "Tam Ekran Panel"), ("overlay", "Küçük Pencere (düşük RAM)") })
+        {
+            var item = new ToolStripMenuItem(label)
+            {
+                Checked = string.Equals(_displayService.CurrentMode, key, StringComparison.OrdinalIgnoreCase)
+            };
+            var capturedKey = key;
+            item.Click += (_, _) =>
+            {
+                _userOverride = true;          // kullanici kipi sectiyse otomatik yerlestirme kapali
+                _displayService.SetMode(capturedKey);
+                _displayService.ApplyMode(this);
+                _isWindowed = true;
+                BuildTrayMenu();
+                Log.Info($"Gorunum kipi secildi: {capturedKey}");
+            };
+            modeMenu.DropDownItems.Add(item);
+        }
+        menu.Items.Add(modeMenu);
         menu.Items.Add(new ToolStripSeparator());
 
         var autoStartItem = new ToolStripMenuItem("Başlangıçta Aç")

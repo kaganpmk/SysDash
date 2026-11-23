@@ -10,7 +10,27 @@
     <ApplicationIcon>app_icon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+
+    <!-- Surum / urun meta (installer ve dosya ozellikleri buradan okur) -->
+    <Version>1.3.0</Version>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <FileVersion>1.3.0.0</FileVersion>
+    <Product>SysDash</Product>
+    <AssemblyTitle>SysDash - Sistem Izleyici</AssemblyTitle>
+    <Company>Pamuk Tech</Company>
+    <Authors>Alper Kagan Pamuk</Authors>
+    <Copyright>Copyright (c) 2026 Alper Kagan Pamuk</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/kaganpmk/SysDash</RepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Harfsiz bolum (Linux ext4) okuyucu: cikis klasorune kopyalanir -->
+    <None Update="Tools\LinuxPartRead.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />

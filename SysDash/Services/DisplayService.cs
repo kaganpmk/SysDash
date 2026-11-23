@@ -93,16 +93,103 @@ public class DisplayService
     }
 
     private int _lastKnownScreenCount = Screen.AllScreens.Length;
+    private string _lastScreenSignature = "";
 
-    public int CheckForScreenChanges()
+    /// <summary>
+    /// Ekran duzeninin imzasi: cihaz adi + cozunurluk + konum. Sayi degil KIMLIK karsilastirilir,
+    /// aksi halde ayni sayida ekranla ekran degistirmek algilanmaz.
+    /// </summary>
+    public string CheckForScreenChanges()
     {
-        var current = Screen.AllScreens.Length;
-        if (current != _lastKnownScreenCount)
+        var screens = Screen.AllScreens;
+        var signature = string.Join("|", screens.Select(s =>
+            $"{s.DeviceName}:{s.Bounds.Width}x{s.Bounds.Height}@{s.Bounds.X},{s.Bounds.Y}"));
+
+        if (signature != _lastScreenSignature)
         {
-            _lastKnownScreenCount = current;
-            ScreensChanged?.Invoke();
+            var changed = _lastScreenSignature.Length > 0;
+            _lastScreenSignature = signature;
+            _lastKnownScreenCount = screens.Length;
+            if (changed)
+            {
+                Log.Info($"Ekran duzeni: {signature}");
+                ScreensChanged?.Invoke();
+            }
         }
-        return current;
+        return signature;
+    }
+
+    public string CurrentMode => string.IsNullOrEmpty(_config.Mode) ? "panel" : _config.Mode;
+
+    /// <summary>Kucuk pencere konumu/boyutu hatirlanir; sonraki acilista oraya gelir.</summary>
+    public void RememberOverlayBounds(double left, double top, double width, double height)
+    {
+        if (double.IsNaN(left) || double.IsNaN(top) || width < 100 || height < 100) return;
+        // Kucultulmus pencere -32000'de durur; bu konumu kaydetmek sonraki acilisi bozar.
+        if (left <= -30000 || top <= -30000) return;
+        if (_config.OverlayLeft == left && _config.OverlayTop == top &&
+            _config.OverlayWidth == width && _config.OverlayHeight == height) return;
+
+        _config.OverlayLeft = left;
+        _config.OverlayTop = top;
+        _config.OverlayWidth = width;
+        _config.OverlayHeight = height;
+        _configService.Save(_config);
+    }
+
+    public void SetMode(string mode)
+    {
+        _config.Mode = mode;
+        _configService.Save(_config);
+        Log.Info($"Gorunum kipi: {mode}");
+    }
+
+    /// <summary>
+    /// Config'teki kipe gore pencereyi yerlestirir.
+    /// OLCUM (2026-11-23): kucuk pencere RAM'i DUSURMUYOR (420x300 de 200x150 de ~298 MB).
+    /// Maliyet pencere boyutunda degil, WPF'in tum XAML agacini kurmasindan geliyor.
+    /// Bu yuzden overlay yalniz bir rahatlik secenegidir; RAM icin ayri bir sade gorunum gerekir.
+    /// </summary>
+    public void ApplyMode(Window window)
+    {
+        if (string.Equals(CurrentMode, "overlay", StringComparison.OrdinalIgnoreCase))
+        {
+            window.WindowStyle = WindowStyle.SingleBorderWindow;
+            window.ResizeMode = ResizeMode.CanResize;
+            window.WindowState = WindowState.Normal;
+            window.Topmost = true;
+            window.Title = "SysDash";
+
+            // Ilk acilista ekranin sag ust kosesine yerlestir; sonra kullanici konumunu hatirla.
+            var area = SystemParameters.WorkArea;
+            // Varsayilan 800x600; kullanici boyutlandirinca config'e yazilir.
+            // Varsayilan 800x600; kullanici boyutlandirdiysa o deger kullanilir (0 = varsayilan).
+            window.Width = _config.OverlayWidth >= 300 ? _config.OverlayWidth : 800;
+            window.Height = _config.OverlayHeight >= 200 ? _config.OverlayHeight : 600;
+            // Kayitli konum yoksa ya da ekran disindaysa sag ust koseye yerles.
+            var left = _config.OverlayLeft ?? double.NaN;
+            var top = _config.OverlayTop ?? double.NaN;
+            var onScreen = !double.IsNaN(left) && !double.IsNaN(top) &&
+                           left > area.Left - 50 && top > area.Top - 50 &&
+                           left < area.Right - 100 && top < area.Bottom - 100;
+
+            window.Left = onScreen ? left : Math.Max(area.Left + 24, area.Right - window.Width - 24);
+            window.Top = onScreen ? top : area.Top + 24;
+            Log.Info($"Overlay modu: {window.Width:F0}x{window.Height:F0} @ {window.Left:F0},{window.Top:F0}");
+            return;
+        }
+
+        // panel: cok ekran varsa hedef ekran tam kaplansin, yoksa pencere modu.
+        var screens = Screen.AllScreens;
+        if (screens.Length > 1)
+        {
+            var target = GetTargetScreen();
+            if (target != null) PositionWindowOnScreen(window, target);
+        }
+        else
+        {
+            SetWindowedMode(window);
+        }
     }
 
     public void SetWindowedMode(Window window)
